@@ -1,0 +1,156 @@
+<div class="page">
+  <div class="page-header">
+    <div class="page-header-content">
+      <h1 class="page-title">Générer un Ticket</h1>
+      <p class="page-subtitle">Créez un ticket sécurisé avec signature cryptographique</p>
+    </div>
+  </div>
+
+  <div class="generate-layout">
+    <!-- Form Panel -->
+    <div class="form-panel card" [class.hidden]="generatedTicket">
+      <form [formGroup]="form" (ngSubmit)="generate()">
+        <div class="form-section">
+          <h3 class="form-section-title">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Informations Événement
+          </h3>
+          <div class="form-group">
+            <label>Nom de l'événement <span class="required">*</span></label>
+            <input type="text" formControlName="eventName" placeholder="ex: Concert Jazz Festival 2026"
+              [class.error]="f['eventName'].invalid && f['eventName'].touched" />
+            <span class="error-msg" *ngIf="f['eventName'].invalid && f['eventName'].touched">
+              Nom requis (minimum 3 caractères)
+            </span>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Date de l'événement <span class="required">*</span></label>
+              <input type="datetime-local" formControlName="eventDate"
+                [class.error]="f['eventDate'].invalid && f['eventDate'].touched" />
+              <span class="error-msg" *ngIf="f['eventDate'].invalid && f['eventDate'].touched">Date requise</span>
+            </div>
+            <div class="form-group">
+              <label>Lieu <span class="required">*</span></label>
+              <input type="text" formControlName="eventLocation" placeholder="ex: Salle Pleyel, Paris"
+                [class.error]="f['eventLocation'].invalid && f['eventLocation'].touched" />
+              <span class="error-msg" *ngIf="f['eventLocation'].invalid && f['eventLocation'].touched">Lieu requis</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3 class="form-section-title">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/></svg>
+            Informations Titulaire
+          </h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nom complet <span class="required">*</span></label>
+              <input type="text" formControlName="holderName" placeholder="Prénom Nom"
+                [class.error]="f['holderName'].invalid && f['holderName'].touched" />
+              <span class="error-msg" *ngIf="f['holderName'].invalid && f['holderName'].touched">Nom requis</span>
+            </div>
+            <div class="form-group">
+              <label>Email <span class="required">*</span></label>
+              <input type="email" formControlName="holderEmail" placeholder="email@exemple.com"
+                [class.error]="f['holderEmail'].invalid && f['holderEmail'].touched" />
+              <span class="error-msg" *ngIf="f['holderEmail'].invalid && f['holderEmail'].touched">Email valide requis</span>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Catégorie</label>
+              <select formControlName="category">
+                <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Numéro de siège</label>
+              <input type="text" formControlName="seatNumber" placeholder="ex: A-12" />
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full" [disabled]="isGenerating">
+          <span class="spinner" *ngIf="isGenerating"></span>
+          <svg *ngIf="!isGenerating" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          {{ isGenerating ? 'Génération...' : 'Générer le ticket' }}
+        </button>
+      </form>
+    </div>
+
+    <!-- Result Panel -->
+    <div class="result-panel" *ngIf="generatedTicket">
+      <!-- Ticket Card -->
+      <div class="ticket-card">
+        <div class="ticket-header">
+          <div class="ticket-category-badge" [ngClass]="'cat-' + generatedTicket.category.toLowerCase()">
+            {{ generatedTicket.category }}
+          </div>
+          <span class="ticket-id">{{ generatedTicket.id }}</span>
+        </div>
+        <div class="ticket-event">
+          <h2>{{ generatedTicket.eventName }}</h2>
+          <div class="ticket-meta">
+            <span>
+              <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              {{ formatDate(generatedTicket.eventDate) }}
+            </span>
+            <span>
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="1.8"/></svg>
+              {{ generatedTicket.eventLocation }}
+            </span>
+          </div>
+        </div>
+        <div class="ticket-divider">
+          <div class="ticket-notch left"></div>
+          <div class="ticket-dots"></div>
+          <div class="ticket-notch right"></div>
+        </div>
+        <div class="ticket-body">
+          <div class="ticket-holder">
+            <div class="holder-info">
+              <span class="holder-name">{{ generatedTicket.holderName }}</span>
+              <span class="holder-email">{{ generatedTicket.holderEmail }}</span>
+              <span class="holder-seat" *ngIf="generatedTicket.seatNumber">Siège : {{ generatedTicket.seatNumber }}</span>
+            </div>
+            <div class="qr-container">
+              <qrcode
+                [qrdata]="qrData"
+                [width]="140"
+                [colorDark]="'#0f0f1a'"
+                [colorLight]="'#ffffff'"
+                [errorCorrectionLevel]="'H'"
+                [imageHeight]="30"
+                [imageWidth]="30"
+              ></qrcode>
+            </div>
+          </div>
+        </div>
+        <div class="ticket-footer">
+          <div class="security-badge">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 2l7 4v6c0 4.5-3 8.5-7 10C5 20 2 16 2 11.5V6l10-4z" stroke="currentColor" stroke-width="1.8"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Ticket sécurisé — HMAC-SHA256
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="result-actions">
+        <button class="btn btn-secondary" (click)="copyId()">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke="currentColor" stroke-width="1.8"/></svg>
+          {{ copied ? 'Copié !' : 'Copier l\'ID' }}
+        </button>
+        <button class="btn btn-secondary" (click)="downloadQr()">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Télécharger QR
+        </button>
+        <button class="btn btn-ghost" (click)="reset()">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 009 9 9.75 9.75 0 006.74-2.74L21 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M21 3v6h-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.51 9A9 9 0 0112 3a9.13 9.13 0 016.74 2.74" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Nouveau ticket
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

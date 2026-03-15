@@ -1,0 +1,126 @@
+<div class="page dashboard-page">
+  <div class="page-header">
+    <div class="page-header-content">
+      <h1 class="page-title">Dashboard</h1>
+      <p class="page-subtitle">Vue d'ensemble de la gestion des tickets</p>
+    </div>
+    <a routerLink="/generate" class="btn btn-primary">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Nouveau Ticket
+    </a>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    <div class="stat-card stat-total">
+      <div class="stat-icon">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 5a1 1 0 011-1h14a1 1 0 011 1v3a2 2 0 000 4v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3a2 2 0 000-4V5z" stroke="currentColor" stroke-width="1.8"/></svg>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ stats.total }}</span>
+        <span class="stat-label">Total Tickets</span>
+      </div>
+    </div>
+    <div class="stat-card stat-active">
+      <div class="stat-icon">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/></svg>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ stats.active }}</span>
+        <span class="stat-label">Actifs</span>
+      </div>
+    </div>
+    <div class="stat-card stat-used">
+      <div class="stat-icon">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ stats.used }}</span>
+        <span class="stat-label">Utilisés</span>
+      </div>
+    </div>
+    <div class="stat-card stat-expired">
+      <div class="stat-icon">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v4l3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ stats.expired }}</span>
+        <span class="stat-label">Expirés</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="section">
+    <h2 class="section-title">Actions rapides</h2>
+    <div class="actions-grid">
+      <a routerLink="/generate" class="action-card">
+        <div class="action-icon action-generate">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="1" stroke="currentColor" stroke-width="2"/><rect x="13" y="3" width="8" height="8" rx="1" stroke="currentColor" stroke-width="2"/><rect x="3" y="13" width="8" height="8" rx="1" stroke="currentColor" stroke-width="2"/><path d="M13 13h2v2h-2zM17 13h4v4h-4zM13 17h2v4h-2zM17 19h4" stroke="currentColor" stroke-width="1.5"/></svg>
+        </div>
+        <h3>Générer un QR Code</h3>
+        <p>Créer un nouveau ticket sécurisé</p>
+      </a>
+      <a routerLink="/scan" class="action-card">
+        <div class="action-icon action-scan">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <h3>Scanner un QR Code</h3>
+        <p>Valider l'authenticité d'un ticket</p>
+      </a>
+      <a routerLink="/tickets" class="action-card">
+        <div class="action-icon action-list">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 10h16M4 14h12M4 18h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </div>
+        <h3>Liste des tickets</h3>
+        <p>Consulter et gérer tous les tickets</p>
+      </a>
+    </div>
+  </div>
+
+  <!-- Recent Tickets -->
+  <div class="section" *ngIf="recentTickets.length > 0">
+    <div class="section-header">
+      <h2 class="section-title">Tickets récents</h2>
+      <a routerLink="/tickets" class="btn-link">Voir tout →</a>
+    </div>
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Événement</th>
+            <th>Titulaire</th>
+            <th>Catégorie</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let ticket of recentTickets">
+            <td class="ticket-id">{{ ticket.id }}</td>
+            <td>{{ ticket.eventName }}</td>
+            <td>{{ ticket.holderName }}</td>
+            <td>
+              <span class="badge badge-category">{{ ticket.category }}</span>
+            </td>
+            <td>
+              <span class="badge" [ngClass]="'badge-' + ticket.status">
+                {{ getStatusLabel(ticket.status) }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Empty state -->
+  <div class="empty-state" *ngIf="stats.total === 0">
+    <div class="empty-icon">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 5a1 1 0 011-1h14a1 1 0 011 1v3a2 2 0 000 4v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3a2 2 0 000-4V5z" stroke="currentColor" stroke-width="1.5"/></svg>
+    </div>
+    <h3>Aucun ticket encore</h3>
+    <p>Commencez par générer votre premier ticket sécurisé.</p>
+    <a routerLink="/generate" class="btn btn-primary">Créer un ticket</a>
+  </div>
+</div>
