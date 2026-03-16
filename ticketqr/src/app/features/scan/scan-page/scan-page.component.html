@@ -2,150 +2,96 @@
   <div class="page-header">
     <div class="page-header-content">
       <h1 class="page-title">Scanner un Ticket</h1>
-      <p class="page-subtitle">Validez l'authenticité d'un ticket par QR code</p>
+      <p class="page-subtitle">Vérifiez l'authenticité d'un ticket en un scan</p>
     </div>
   </div>
 
-  <!-- Mode Tabs -->
-  <div class="mode-tabs">
-    <button class="mode-tab" [class.active]="mode === 'camera'" (click)="setMode('camera')">
-      <svg viewBox="0 0 24 24" fill="none"><path d="M23 7l-7 5 7 5V7z" stroke="currentColor" stroke-width="1.8"/><rect x="1" y="5" width="15" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/></svg>
-      Caméra
-    </button>
-    <button class="mode-tab" [class.active]="mode === 'manual'" (click)="setMode('manual')">
-      <svg viewBox="0 0 24 24" fill="none"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="currentColor" stroke-width="1.8"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="1.8"/></svg>
-      Saisie manuelle
-    </button>
-  </div>
-
   <div class="scan-container">
-    <!-- Camera Mode -->
-    <ng-container *ngIf="mode === 'camera' && state !== 'result'">
-      <div class="camera-panel card">
-        <div class="camera-idle" *ngIf="state === 'idle'">
-          <div class="camera-illustration">
-            <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="15" y="15" width="30" height="30" rx="3" stroke="currentColor" stroke-width="3" class="corner tl"/>
-              <rect x="75" y="15" width="30" height="30" rx="3" stroke="currentColor" stroke-width="3" class="corner tr"/>
-              <rect x="15" y="75" width="30" height="30" rx="3" stroke="currentColor" stroke-width="3" class="corner bl"/>
-              <rect x="75" y="75" width="30" height="30" rx="3" stroke="currentColor" stroke-width="3" class="corner br"/>
-              <line x1="20" y1="60" x2="100" y2="60" stroke="#6366f1" stroke-width="2" stroke-dasharray="4 3" class="scan-line"/>
-            </svg>
+
+    <!-- IDLE -->
+    <ng-container *ngIf="state === 'idle'">
+      <div class="scan-card card">
+        <div class="scan-illustration">
+          <svg viewBox="0 0 140 140" fill="none">
+            <rect x="20" y="20" width="35" height="35" rx="4" stroke="#6366f1" stroke-width="3" opacity="0.5"/>
+            <rect x="85" y="20" width="35" height="35" rx="4" stroke="#6366f1" stroke-width="3" opacity="0.5"/>
+            <rect x="20" y="85" width="35" height="35" rx="4" stroke="#6366f1" stroke-width="3" opacity="0.5"/>
+            <rect x="85" y="85" width="35" height="35" rx="4" stroke="#6366f1" stroke-width="3" opacity="0.5"/>
+            <line x1="15" y1="70" x2="125" y2="70" stroke="#6366f1" stroke-width="2.5" stroke-linecap="round" class="scan-line"/>
+          </svg>
+        </div>
+        <h3>Prêt à scanner</h3>
+        <p>Pointez la caméra vers le QR code imprimé sur le ticket</p>
+
+        <button class="btn btn-primary btn-full" (click)="startCamera()">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Activer la caméra
+        </button>
+
+        <button class="btn-link" (click)="showManual = !showManual">
+          {{ showManual ? 'Masquer la saisie manuelle' : 'Saisie manuelle' }}
+        </button>
+
+        <div class="manual-zone" *ngIf="showManual">
+          <div class="form-group">
+            <label>Données du QR code</label>
+            <textarea [(ngModel)]="manualInput" placeholder="Collez les données ici..." rows="3"></textarea>
           </div>
-          <h3>Prêt à scanner</h3>
-          <p>Pointez la caméra vers le QR code du ticket</p>
-          <button class="btn btn-primary" (click)="startCamera()">
-            <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" fill="currentColor"/><path d="M12 5C7 5 2.73 8.11 1 13c1.73 4.89 6 8 11 8s9.27-3.11 11-8c-1.73-4.89-6-8-11-8z" stroke="currentColor" stroke-width="1.8"/></svg>
-            Activer la caméra
+          <button class="btn btn-secondary btn-full" (click)="validateManual()">
+            Valider
           </button>
-          <p class="error-msg" *ngIf="error">{{ error }}</p>
         </div>
 
-        <div class="camera-active" *ngIf="state === 'scanning'">
-          <div id="qr-reader" class="qr-reader-element"></div>
-          <div class="scan-overlay">
-            <div class="scan-frame">
-              <div class="frame-corner tl"></div>
-              <div class="frame-corner tr"></div>
-              <div class="frame-corner bl"></div>
-              <div class="frame-corner br"></div>
-              <div class="scan-beam"></div>
-            </div>
-          </div>
-          <button class="btn btn-ghost btn-stop" (click)="stopCamera(); state = 'idle'">
-            Arrêter le scan
-          </button>
-        </div>
+        <p class="error-msg" *ngIf="cameraError">{{ cameraError }}</p>
       </div>
     </ng-container>
 
-    <!-- Manual Mode -->
-    <ng-container *ngIf="mode === 'manual' && state !== 'result'">
-      <div class="manual-panel card">
-        <div class="manual-icon">
-          <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.8"/><rect x="13" y="3" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="13" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.8"/><path d="M13 13h8v8h-8z" stroke="currentColor" stroke-width="1.8" stroke-dasharray="2 2"/></svg>
+    <!-- SCANNING -->
+    <ng-container *ngIf="state === 'scanning'">
+      <div class="scan-card card scanning-card">
+        <div id="qr-reader" class="qr-reader-element"></div>
+        <div class="scan-frame-overlay">
+          <div class="frame-corner tl"></div>
+          <div class="frame-corner tr"></div>
+          <div class="frame-corner bl"></div>
+          <div class="frame-corner br"></div>
+          <div class="scan-beam"></div>
         </div>
-        <h3>Saisie manuelle du QR code</h3>
-        <p>Collez le contenu JSON du QR code pour validation</p>
-        <div class="form-group mt-1">
-          <label>Données QR code</label>
-          <textarea
-            [(ngModel)]="manualInput"
-            placeholder='{"id":"TKT-...","signature":"..."}'
-            rows="5"
-            [class.error]="!!error"
-          ></textarea>
-          <span class="error-msg" *ngIf="error">{{ error }}</span>
-        </div>
-        <button class="btn btn-primary" (click)="validateManual()">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/></svg>
-          Valider
+        <button class="btn btn-ghost" (click)="stopCamera(); state = 'idle'">
+          Annuler
         </button>
       </div>
     </ng-container>
 
-    <!-- Result -->
-    <ng-container *ngIf="state === 'result' && result">
-      <div class="result-panel card" [class.result-valid]="result.valid" [class.result-invalid]="!result.valid">
-        <div class="result-header">
-          <div class="result-icon" [class.valid]="result.valid" [class.invalid]="!result.valid">
-            <svg *ngIf="result.valid" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <svg *ngIf="!result.valid" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
-          </div>
-          <div class="result-status">
-            <h2>{{ result.valid ? 'Ticket Valide !' : 'Ticket Invalide' }}</h2>
-            <p>{{ result.message }}</p>
-          </div>
+    <!-- VALID -->
+    <ng-container *ngIf="state === 'valid'">
+      <div class="result-card card result-valid">
+        <div class="result-icon valid-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
-
-        <div class="result-ticket-info" *ngIf="result.ticket">
-          <div class="info-grid">
-            <div class="info-item">
-              <span class="info-label">Événement</span>
-              <span class="info-value">{{ result.ticket.eventName }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Date</span>
-              <span class="info-value">{{ formatDate(result.ticket.eventDate) }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Lieu</span>
-              <span class="info-value">{{ result.ticket.eventLocation }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Titulaire</span>
-              <span class="info-value">{{ result.ticket.holderName }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Catégorie</span>
-              <span class="info-value">
-                <span class="badge badge-category">{{ result.ticket.category }}</span>
-              </span>
-            </div>
-            <div class="info-item" *ngIf="result.ticket.seatNumber">
-              <span class="info-label">Siège</span>
-              <span class="info-value">{{ result.ticket.seatNumber }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">ID Ticket</span>
-              <span class="info-value ticket-id-text">{{ result.ticket.id }}</span>
-            </div>
-            <div class="info-item" *ngIf="result.ticket.usedAt">
-              <span class="info-label">Utilisé le</span>
-              <span class="info-value">{{ formatDate(result.ticket.usedAt) }}</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="result-timestamp">
-          Scanné le {{ formatDate(result.scannedAt) }}
-        </div>
-
-        <button class="btn btn-secondary" (click)="reset()">
+        <h2>Ticket Authentique</h2>
+        <p>Ce ticket est valide et a bien été émis par votre système.</p>
+        <button class="btn btn-primary btn-full" (click)="reset()">
           <svg viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 009 9 9.75 9.75 0 006.74-2.74L21 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M21 3v6h-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Scanner un autre ticket
+          Scanner un autre
         </button>
       </div>
     </ng-container>
+
+    <!-- INVALID -->
+    <ng-container *ngIf="state === 'invalid'">
+      <div class="result-card card result-invalid">
+        <div class="result-icon invalid-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+        </div>
+        <h2>Ticket Invalide</h2>
+        <p>Ce QR code ne provient pas de votre système. Le ticket pourrait être falsifié.</p>
+        <button class="btn btn-secondary btn-full" (click)="reset()">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 009 9 9.75 9.75 0 006.74-2.74L21 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M21 3v6h-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Réessayer
+        </button>
+      </div>
+    </ng-container>
+
   </div>
 </div>
