@@ -33,6 +33,18 @@
   svg { width: 14px; height: 14px; }
 }
 
+.qr-loading {
+  width: 260px;
+  height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.05);
+  border-radius: 18px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
 .qr-wrapper {
   position: relative;
   display: inline-block;

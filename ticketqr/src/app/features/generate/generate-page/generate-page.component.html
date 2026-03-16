@@ -15,14 +15,17 @@
       </div>
 
       <!-- QR Code -->
-      <div class="qr-wrapper">
+      <div class="qr-wrapper" #qrWrapper>
         <qrcode
+          *ngIf="qrData"
           [qrdata]="qrData"
           [width]="260"
+          [elementType]="'canvas'"
           [colorDark]="'#0f0f1a'"
           [colorLight]="'#ffffff'"
           [errorCorrectionLevel]="'H'"
         ></qrcode>
+        <div class="qr-loading" *ngIf="!qrData">Chargement...</div>
         <div class="qr-glow"></div>
       </div>
 
